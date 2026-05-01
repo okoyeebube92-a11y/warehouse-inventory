@@ -9,12 +9,15 @@ import StockExit   from './pages/StockExit';
 import EntryByDate from './pages/EntryByDate';
 import StockBalance from './pages/StockBalance';
 import LoginPage from './pages/LoginPage';
+import ProtectedRoute from './components/ProtectedRoute';
 
+import { useAuth } from './hooks/useAuth';
 import { useInventory } from './hooks/useInventory';
 import { useToast }     from './hooks/useToast';
 import { getAllModels, getBalance, getStatus } from './utils/inventory';
 
 export default function App() {
+  const { user } = useAuth();
   const { entries, exits, addEntries, addExits } = useInventory();
   const { toast, showToast } = useToast();
 
@@ -28,26 +31,42 @@ export default function App() {
 
   return (
     <>
-      <NavBar alertCount={alertCount} />
+      {user && <NavBar alertCount={alertCount} />}
 
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/" element={<Navigate to="/stock-entry" replace />} />
         <Route
           path="/stock-entry"
-          element={<StockEntry {...pageProps} addEntries={addEntries} />}
+          element={
+            <ProtectedRoute>
+              <StockEntry {...pageProps} addEntries={addEntries} />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/stock-exit"
-          element={<StockExit {...pageProps} addExits={addExits} />}
+          element={
+            <ProtectedRoute>
+              <StockExit {...pageProps} addExits={addExits} />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/entry-by-date"
-          element={<EntryByDate entries={entries} />}
+          element={
+            <ProtectedRoute>
+              <EntryByDate entries={entries} />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/balance"
-          element={<StockBalance entries={entries} exits={exits} />}
+          element={
+            <ProtectedRoute>
+              <StockBalance entries={entries} exits={exits} />
+            </ProtectedRoute>
+          }
         />
       </Routes>
 

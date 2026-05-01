@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { login } from "../api/authApi";
+import { AuthContext } from "../context/AuthContext";
+import { supabase } from "../lib/supabase";
 
 export function useAuth() {
+  const { user, loading: globalLoading } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [user, setUser] = useState(null);
 
   const signIn = async (email, password) => {
     setLoading(true);
@@ -12,7 +14,6 @@ export function useAuth() {
 
     try {
       const data = await login(email, password);
-      setUser(data.user);
       return data;
     } catch (err) {
       setError(err.message);
@@ -22,10 +23,21 @@ export function useAuth() {
     }
   };
 
+  const signOut = async () => {
+    setLoading(true);
+    try {
+      await supabase.auth.signOut();
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
-    signIn,
     user,
+    globalLoading,
     loading,
-    error
+    error,
+    signIn,
+    signOut
   };
 }
