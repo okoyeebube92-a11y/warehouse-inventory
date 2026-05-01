@@ -1,0 +1,13 @@
+/* src/styles/StockEntry.css */
+.entry-layout {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 780px) {
+  .entry-layout {
+    grid-template-columns: 1fr;
+  }
+}

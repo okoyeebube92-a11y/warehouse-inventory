@@ -1,0 +1,77 @@
+/* src/styles/EntryByDate.css */
+.back-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.back-btn {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  font-family: var(--font-head);
+  padding: 0;
+}
+.back-btn:hover { color: var(--text); }
+.breadcrumb { font-size: 13px; color: var(--text3); }
+.breadcrumb strong { color: var(--text); font-weight: 600; }
+
+/* Date list */
+.date-list__header {
+  display: grid;
+  grid-template-columns: 1fr 100px 130px 80px;
+  gap: 8px;
+  padding: 9px 16px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.date-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 130px 80px;
+  gap: 8px;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.date-row:last-child { border-bottom: none; }
+.date-row:hover { background: var(--surface2); }
+
+.date-id {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent);
+  background: var(--accent-light);
+  padding: 2px 7px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+/* Detail footer */
+.detail-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 20px;
+}
+.detail-footer__item {
+  font-size: 12px;
+  color: var(--text2);
+}
+.detail-footer__item strong {
+  color: var(--text);
+  font-weight: 600;
+}

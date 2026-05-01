@@ -1,0 +1,249 @@
+/* ============================================================
+   GLOBAL STYLES — src/styles/global.css
+   ============================================================ */
+
+:root {
+  --bg: #F5F3EE;
+  --surface: #FFFFFF;
+  --surface2: #EFEDE8;
+  --border: #D8D5CE;
+  --border2: #C8C4BB;
+  --text: #1A1816;
+  --text2: #6B6760;
+  --text3: #9E9A93;
+  --accent: #1A3A5C;
+  --accent-light: #E8EFF6;
+  --green: #2A6B3A;
+  --green-bg: #E8F3EB;
+  --amber: #8A5A0A;
+  --amber-bg: #FDF3E0;
+  --red: #8A1A1A;
+  --red-bg: #FCEAEA;
+  --font-head: 'Syne', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-head);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ---- BUTTONS ---- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  border: 1px solid var(--border2);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-head);
+  transition: background 0.12s, border-color 0.12s;
+}
+.btn:hover { background: var(--surface2); }
+.btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn-primary:hover { background: #142e4a; }
+.btn-danger { background: var(--red); color: #fff; border-color: var(--red); }
+.btn-danger:hover { background: #6e1414; }
+.btn-sm { padding: 5px 11px; font-size: 12px; }
+
+/* ---- CARD ---- */
+/* TO */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.card > .table-wrap {
+  overflow-x: auto;
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+.card-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.card-title { font-size: 14px; font-weight: 600; }
+.card-body { padding: 20px; }
+
+/* ---- BADGES ---- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 99px;
+  white-space: nowrap;
+  font-family: var(--font-head);
+}
+.badge-green { background: var(--green-bg); color: var(--green); }
+.badge-amber { background: var(--amber-bg); color: var(--amber); }
+.badge-red   { background: var(--red-bg);   color: var(--red); }
+.badge-blue  { background: var(--accent-light); color: var(--accent); }
+.badge-neutral { background: var(--surface2); color: var(--text2); }
+
+.dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.dot-green  { background: var(--green); }
+.dot-amber  { background: #D48A10; }
+.dot-red    { background: #C42A2A; }
+
+/* ---- MONO CHIP ---- */
+.mono {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent);
+  background: var(--accent-light);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+/* ---- FORMS ---- */
+.form-group { margin-bottom: 18px; }
+.form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text2);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.form-hint { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+input[type='text'],
+input[type='number'],
+input[type='date'],
+select {
+  width: 100%;
+  padding: 9px 12px;
+  font-size: 14px;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-head);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+input:focus,
+select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(26, 58, 92, 0.08);
+}
+
+.qty-row {
+  display: grid;
+  grid-template-columns: 1fr 150px;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.qty-row input {
+  border: none;
+  border-radius: 0;
+  width: 100%;
+}
+.qty-row select {
+  border: none;
+  border-left: 1px solid var(--border2);
+  border-radius: 0;
+  background: var(--surface2);
+}
+.qty-row input:focus,
+.qty-row select:focus {
+  box-shadow: none;
+}
+
+.btn-row {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  margin-top: 4px;
+}
+
+/* ---- TABLE ---- */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th {
+  text-align: left;
+  padding: 9px 16px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  vertical-align: middle;
+}
+tr:last-child td { border-bottom: none; }
+tbody tr { cursor: pointer; transition: background 0.1s; }
+tbody tr:hover td { background: var(--surface2); }
+tbody tr.row-low  td { background: #FFFBF2; }
+tbody tr.row-none td { background: #FFF8F8; }
+tbody tr.row-low:hover  td { background: #FDF5DC; }
+tbody tr.row-none:hover td { background: #FADDDD; }
+
+/* ---- PAGE LAYOUT ---- */
+.page-content {
+  padding: 28px 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+}
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+.page-title { font-size: 22px; font-weight: 700; letter-spacing: -0.03em; color: var(--text); }
+.page-sub { font-size: 13px; color: var(--text2); margin-top: 3px; }
+
+/* ---- MISC ---- */
+.empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text3);
+  font-size: 14px;
+}
+.num-in  { color: var(--green); font-weight: 600; }
+.num-out { color: var(--red);   font-weight: 600; }
+.num-bal { font-weight: 600; }
+.num-bal.zero { color: var(--red); }
+.num-bal.low  { color: var(--amber); }

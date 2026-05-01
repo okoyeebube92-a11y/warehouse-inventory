@@ -1,0 +1,64 @@
+/* src/styles/SessionList.css */
+.session-list__header {
+  display: grid;
+  grid-template-columns: 1fr 80px 80px 32px;
+  gap: 8px;
+  padding: 0 16px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0;
+  padding-top: 12px;
+}
+
+.session-item {
+  display: grid;
+  grid-template-columns: 1fr 80px 80px 32px;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.session-item:last-child { border-bottom: none; }
+
+.session-model {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent);
+}
+.session-date {
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 2px;
+}
+
+.session-qty {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+.session-qty--exit { color: var(--red); }
+
+.remove-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--text3);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.1s, color 0.1s, border-color 0.1s;
+  line-height: 1;
+}
+.remove-btn:hover {
+  background: var(--red-bg);
+  color: var(--red);
+  border-color: var(--red);
+}
