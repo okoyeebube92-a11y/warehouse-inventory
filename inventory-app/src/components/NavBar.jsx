@@ -1,8 +1,10 @@
 // src/components/NavBar.jsx
 import { NavLink } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 import '../styles/NavBar.css';
 
 export default function NavBar({ alertCount }) {
+  const { signOut } = useAuth();
   return (
     <nav className="nav-bar">
       <div className="nav-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -33,6 +35,11 @@ export default function NavBar({ alertCount }) {
             <span className="tab-badge">{alertCount}</span>
           )}
         </NavLink>
+      </div>
+      <div className="nav-actions">
+        <button className="btn btn-sm" onClick={signOut} style={{ fontSize: '12px', opacity: 0.8 }}>
+          Sign Out
+        </button>
       </div>
     </nav>
   );
