@@ -1,47 +1,74 @@
-// src/hooks/useInventory.js
-// Central state hook. Swap localStorage calls for API calls here
-// when connecting to Supabase or a Node.js backend.
-
-import { useState, useCallback } from 'react';
-
-const STORAGE_KEYS = {
-  entries: 'inv_entries',
-  exits:   'inv_exits',
-};
-
-function loadFromStorage(key) {
-  try {
-    return JSON.parse(localStorage.getItem(key) || '[]');
-  } catch {
-    return [];
-  }
-}
-
-function saveToStorage(key, data) {
-  localStorage.setItem(key, JSON.stringify(data));
-}
+import { useState, useCallback, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 
 export function useInventory() {
-  const [entries, setEntries] = useState(() => loadFromStorage(STORAGE_KEYS.entries));
-  const [exits,   setExits]   = useState(() => loadFromStorage(STORAGE_KEYS.exits));
+  const [entries, setEntries] = useState([]);
+  const [exits, setExits] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { data: entriesData, error: entriesError } = await supabase
+        .from('stock_entries')
+        .select('*')
+        .order('date', { ascending: false });
+
+      const { data: exitsData, error: exitsError } = await supabase
+        .from('stock_exits')
+        .select('*')
+        .order('date', { ascending: false });
+
+      if (entriesError) throw entriesError;
+      if (exitsError) throw exitsError;
+
+      setEntries(entriesData || []);
+      setExits(exitsData || []);
+    } catch (error) {
+      console.error("Error fetching inventory:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   // ---------- ENTRIES ----------
-  const addEntries = useCallback((newItems) => {
-    setEntries(prev => {
-      const updated = [...prev, ...newItems];
-      saveToStorage(STORAGE_KEYS.entries, updated);
-      return updated;
-    });
+  const addEntries = useCallback(async (newItems) => {
+    try {
+      const { data, error } = await supabase
+        .from('stock_entries')
+        .insert(newItems)
+        .select();
+
+      if (error) throw error;
+      setEntries(prev => [...(data || []), ...prev]);
+      return data;
+    } catch (error) {
+      console.error("Error adding entries:", error);
+      throw error;
+    }
   }, []);
 
   // ---------- EXITS ----------
-  const addExits = useCallback((newItems) => {
-    setExits(prev => {
-      const updated = [...prev, ...newItems];
-      saveToStorage(STORAGE_KEYS.exits, updated);
-      return updated;
-    });
+  const addExits = useCallback(async (newItems) => {
+    try {
+      const { data, error } = await supabase
+        .from('stock_exits')
+        .insert(newItems)
+        .select();
+
+      if (error) throw error;
+      setExits(prev => [...(data || []), ...prev]);
+      return data;
+    } catch (error) {
+      console.error("Error adding exits:", error);
+      throw error;
+    }
   }, []);
 
-  return { entries, exits, addEntries, addExits };
+  return { entries, exits, loading, addEntries, addExits, refresh: fetchData };
 }
+

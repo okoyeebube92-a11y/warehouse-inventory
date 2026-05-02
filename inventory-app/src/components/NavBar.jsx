@@ -24,6 +24,9 @@ export default function NavBar({ alertCount }) {
         <NavLink to="/entry-by-date" className={({ isActive }) => `nav-tab${isActive ? ' active' : ''}`}>
           Entry by Date
         </NavLink>
+        <NavLink to="/stock-exited" className={({ isActive }) => `nav-tab${isActive ? ' active' : ''}`}>
+          StockExited
+        </NavLink>
         <NavLink to="/balance" className={({ isActive }) => `nav-tab${isActive ? ' active' : ''}`}>
           Stock Balance
           {alertCount > 0 && (

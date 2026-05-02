@@ -9,6 +9,7 @@ import StockExit   from './pages/StockExit';
 import EntryByDate from './pages/EntryByDate';
 import StockBalance from './pages/StockBalance';
 import LoginPage from './pages/LoginPage';
+import StockExited from './pages/StockExited';
 import ProtectedRoute from './components/ProtectedRoute';
 
 import { useAuth } from './hooks/useAuth';
@@ -18,7 +19,7 @@ import { getAllModels, getBalance, getStatus } from './utils/inventory';
 
 export default function App() {
   const { user } = useAuth();
-  const { entries, exits, addEntries, addExits } = useInventory();
+  const { entries, exits, addEntries, addExits, loading } = useInventory();
   const { toast, showToast } = useToast();
 
   // Alert count for the nav badge — derived from live state
@@ -28,6 +29,21 @@ export default function App() {
   }, [entries, exits]);
 
   const pageProps = { entries, exits, showToast };
+
+  if (user && loading) {
+    return (
+      <div style={{ 
+        height: '100vh', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        color: 'var(--text2)',
+        fontFamily: 'var(--font-head)'
+      }}>
+        Syncing with Supabase...
+      </div>
+    );
+  }
 
   return (
     <>
@@ -65,6 +81,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <StockBalance entries={entries} exits={exits} />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/stock-exited"
+          element={
+            <ProtectedRoute>
+              <StockExited exits={exits} />
             </ProtectedRoute>
           }
         />
