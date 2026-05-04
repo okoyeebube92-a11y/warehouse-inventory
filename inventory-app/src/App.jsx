@@ -51,7 +51,7 @@ export default function App() {
 
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/" element={<Navigate to="/stock-entry" replace />} />
+        <Route path="/" element={<Navigate to="/balance" replace />} />
         <Route
           path="/stock-entry"
           element={

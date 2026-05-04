@@ -74,13 +74,18 @@ export default function StockExit({ entries, exits, addExits, showToast }) {
     setSession(prev => prev.filter((_, i) => i !== index));
   }
 
-  function handleSaveAll() {
+  async function handleSaveAll() {
     if (session.length === 0) { showToast('Nothing to save. Add exits first.'); return; }
-    addExits(session);
-    const count = session.length;
-    setSession([]);
-    handleClear();
-    showToast(`✓ ${count} exit ${count === 1 ? 'record' : 'records'} saved successfully.`);
+    try {
+      await addExits(session);
+      const count = session.length;
+      setSession([]);
+      handleClear();
+      showToast(`✓ ${count} exit ${count === 1 ? 'record' : 'records'} saved successfully.`);
+    } catch (err) {
+      showToast('⚠ Failed to save exits. Please try again.');
+      console.error('Save exits error:', err);
+    }
   }
 
   return (

@@ -17,23 +17,23 @@ export default function NavBar({ alertCount }) {
         WIMS
       </div>
       <div className="nav-tabs">
+        <NavLink to="/balance" className={({ isActive }) => `nav-tab${isActive ? ' active' : ''}`}>
+          Stock Balance
+          {alertCount > 0 && (
+            <span className="tab-badge">{alertCount}</span>
+          )}
+        </NavLink>
+        <NavLink to="/entry-by-date" className={({ isActive }) => `nav-tab${isActive ? ' active' : ''}`}>
+          Entry by Date
+        </NavLink>
         <NavLink to="/stock-entry" className={({ isActive }) => `nav-tab${isActive ? ' active' : ''}`}>
           Stock Entry
         </NavLink>
         <NavLink to="/stock-exit" className={({ isActive }) => `nav-tab${isActive ? ' active' : ''}`}>
           Stock Exit
         </NavLink>
-        <NavLink to="/entry-by-date" className={({ isActive }) => `nav-tab${isActive ? ' active' : ''}`}>
-          Entry by Date
-        </NavLink>
         <NavLink to="/stock-exited" className={({ isActive }) => `nav-tab${isActive ? ' active' : ''}`}>
           StockExited
-        </NavLink>
-        <NavLink to="/balance" className={({ isActive }) => `nav-tab${isActive ? ' active' : ''}`}>
-          Stock Balance
-          {alertCount > 0 && (
-            <span className="tab-badge">{alertCount}</span>
-          )}
         </NavLink>
       </div>
       <div className="nav-actions">
