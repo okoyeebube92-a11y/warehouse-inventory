@@ -8,18 +8,36 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [attempts, setAttempts] = useState(0);
+  const [lockedUntil, setLockedUntil] = useState(null);
+  const MAX_ATTEMPTS = 5;
+  const LOCK_DURATION_MS = 5 * 60 * 1000; // 5 minutes
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Check if account is locked
+    if (lockedUntil && Date.now() < lockedUntil) {
+      const remaining = Math.ceil((lockedUntil - Date.now()) / 1000 / 60);
+      return; // toast already showing via error state
+    }
+
     try {
-      const result = await signIn(email, password);
-      console.log("LOGIN SUCCESS:", result);
+      await signIn(email, password);
+      setAttempts(0);
+      setLockedUntil(null);
       navigate("/");
     } catch (err) {
-      console.log("LOGIN FAILED");
+      const nextAttempts = attempts + 1;
+      setAttempts(nextAttempts);
+      if (nextAttempts >= MAX_ATTEMPTS) {
+        setLockedUntil(Date.now() + LOCK_DURATION_MS);
+      }
     }
   };
+
+  const isLocked = lockedUntil && Date.now() < lockedUntil;
+  const attemptsLeft = MAX_ATTEMPTS - attempts;
 
   return (
     <div className="page-content" style={{ maxWidth: "400px", marginTop: "60px" }}>
@@ -37,6 +55,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={isLocked}
               />
             </div>
 
@@ -48,13 +67,27 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={isLocked}
               />
             </div>
 
-            {error && (
+            {isLocked && (
+              <div style={{ marginBottom: "16px", textAlign: "center" }}>
+                <span className="badge badge-red" style={{ display: "inline-block", whiteSpace: "normal", padding: "6px 12px" }}>
+                  🔒 Too many failed attempts. Try again in 5 minutes.
+                </span>
+              </div>
+            )}
+
+            {!isLocked && error && (
               <div style={{ marginBottom: "16px", textAlign: "center" }}>
                 <span className="badge badge-red" style={{ display: "inline-block", whiteSpace: "normal", padding: "6px 12px" }}>
                   {error}
+                  {attempts > 0 && attempts < MAX_ATTEMPTS && (
+                    <span style={{ display: "block", fontSize: "11px", opacity: 0.85, marginTop: "4px" }}>
+                      {attemptsLeft} attempt{attemptsLeft !== 1 ? "s" : ""} remaining before lockout
+                    </span>
+                  )}
                 </span>
               </div>
             )}
@@ -64,9 +97,9 @@ export default function LoginPage() {
                 type="submit"
                 className="btn btn-primary"
                 style={{ width: "100%", justifyContent: "center", padding: "10px" }}
-                disabled={loading}
+                disabled={loading || isLocked}
               >
-                {loading ? "Authenticating..." : "Sign In"}
+                {loading ? "Authenticating..." : isLocked ? "Account Locked" : "Sign In"}
               </button>
             </div>
           </form>

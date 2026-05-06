@@ -5,6 +5,9 @@ import SessionList from '../components/SessionList';
 import { todayISO } from '../utils/inventory';
 import '../styles/StockEntry.css';
 
+// Strip characters that could cause XSS if data is ever rendered unsafely
+const sanitize = (str) => str.replace(/[<>"'&]/g, '');
+
 export default function StockEntry({ entries, exits, addEntries, showToast }) {
   const [form, setForm] = useState({
     model: '',
@@ -31,7 +34,7 @@ export default function StockEntry({ entries, exits, addEntries, showToast }) {
     if (!form.unit)       { showToast('Please select a unit (pcs or ctn).'); return; }
 
     const item = {
-      model: model.toUpperCase(),
+      model: sanitize(model.toUpperCase()),
       date:  form.date,
       qty:   parseInt(form.qty, 10),
       unit:  form.unit,
@@ -44,13 +47,17 @@ export default function StockEntry({ entries, exits, addEntries, showToast }) {
     setSession(prev => prev.filter((_, i) => i !== index));
   }
 
-  function handleSaveAll() {
+  async function handleSaveAll() {
     if (session.length === 0) { showToast('Nothing to save. Add entries first.'); return; }
-    addEntries(session);
-    const count = session.length;
-    setSession([]);
-    handleClear();
-    showToast(`✓ ${count} ${count === 1 ? 'entry' : 'entries'} saved successfully.`);
+    try {
+      await addEntries(session);
+      const count = session.length;
+      setSession([]);
+      handleClear();
+      showToast(`✓ ${count} ${count === 1 ? 'entry' : 'entries'} saved successfully.`);
+    } catch (err) {
+      showToast('⚠ Failed to save entries. Please try again.');
+    }
   }
 
   return (

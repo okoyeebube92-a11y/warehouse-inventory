@@ -6,6 +6,9 @@ import SessionList from '../components/SessionList';
 import { todayISO, getBalance, getUnit, getStatus } from '../utils/inventory';
 import '../styles/StockExit.css';
 
+// Strip characters that could cause XSS if data is ever rendered unsafely
+const sanitize = (str) => str.replace(/[<>"'&]/g, '');
+
 export default function StockExit({ entries, exits, addExits, showToast }) {
   const [form, setForm] = useState({
     model: '',
@@ -60,12 +63,12 @@ export default function StockExit({ entries, exits, addExits, showToast }) {
     }
 
     setSession(prev => [...prev, {
-      model: model.toUpperCase(),
+      model: sanitize(model.toUpperCase()),
       date:  form.date,
       qty,
       unit:  form.unit,
-      supplier: form.supplier.trim(),
-      location: form.location.trim(),
+      supplier: sanitize(form.supplier.trim()),
+      location: sanitize(form.location.trim()),
     }]);
     setForm(prev => ({ ...prev, model: '', qty: '', unit: '', supplier: '', location: '' }));
   }
