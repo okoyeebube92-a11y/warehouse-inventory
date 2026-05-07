@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
-export function useInventory() {
+export function useInventory(user) {
   const [entries, setEntries] = useState([]);
   const [exits, setExits] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -32,8 +32,14 @@ export function useInventory() {
   }, []);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (user) {
+      fetchData();
+    } else {
+      setEntries([]);
+      setExits([]);
+      setLoading(false);
+    }
+  }, [fetchData, user]);
 
   // ---------- ENTRIES ----------
   const addEntries = useCallback(async (newItems) => {

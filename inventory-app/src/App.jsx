@@ -19,7 +19,7 @@ import { getAllModels, getBalance, getStatus } from './utils/inventory';
 
 export default function App() {
   const { user } = useAuth();
-  const { entries, exits, addEntries, addExits, loading } = useInventory();
+  const { entries, exits, addEntries, addExits, loading } = useInventory(user);
   const { toast, showToast } = useToast();
 
   // Alert count for the nav badge — derived from live state
