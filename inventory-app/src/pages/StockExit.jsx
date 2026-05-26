@@ -6,17 +6,12 @@ import SessionList from '../components/SessionList';
 import { todayISO, getBalance, getUnit, getStatus } from '../utils/inventory';
 import '../styles/StockExit.css';
 
-// Strip characters that could cause XSS if data is ever rendered unsafely
-const sanitize = (str) => str.replace(/[<>"'&]/g, '');
-
 export default function StockExit({ entries, exits, addExits, showToast }) {
   const [form, setForm] = useState({
     model: '',
     date:  todayISO(),
     qty:   '',
     unit:  '',
-    supplier: '',
-    location: '',
   });
   const [session, setSession] = useState([]);
 
@@ -35,9 +30,12 @@ export default function StockExit({ entries, exits, addExits, showToast }) {
   const remainingHint = useMemo(() => {
     if (!lookup?.found || !form.qty) return null;
     const qty = parseInt(form.qty, 10) || 0;
-    const remaining = lookup.balance - qty;
+    const stagedQty = session
+      .filter(item => item.model === form.model.trim().toUpperCase())
+      .reduce((sum, item) => sum + item.qty, 0);
+    const remaining = lookup.balance - stagedQty - qty;
     return { remaining, unit: lookup.unit, overLimit: remaining < 0 };
-  }, [lookup, form.qty]);
+  }, [lookup, form.qty, session, form.model]);
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -45,7 +43,7 @@ export default function StockExit({ entries, exits, addExits, showToast }) {
   }
 
   function handleClear() {
-    setForm({ model: '', date: todayISO(), qty: '', unit: '', supplier: '', location: '' });
+    setForm({ model: '', date: todayISO(), qty: '', unit: '' });
   }
 
   function handleAddToList() {
@@ -57,38 +55,35 @@ export default function StockExit({ entries, exits, addExits, showToast }) {
     if (!form.unit) { showToast('Please select a unit (pcs or ctn).'); return; }
 
     const balance = getBalance(model.toUpperCase(), entries, exits);
-    if (qty > balance) {
-      showToast(`⚠ Quantity exceeds available stock (${balance}). Please check.`);
+    const stagedQty = session
+      .filter(item => item.model === model.toUpperCase())
+      .reduce((sum, item) => sum + item.qty, 0);
+
+    if (qty + stagedQty > balance) {
+      showToast(`⚠ Quantity exceeds available stock (${balance - stagedQty} remaining). Please check.`);
       return;
     }
 
     setSession(prev => [...prev, {
-      model: sanitize(model.toUpperCase()),
+      model: model.toUpperCase(),
       date:  form.date,
       qty,
       unit:  form.unit,
-      supplier: sanitize(form.supplier.trim()),
-      location: sanitize(form.location.trim()),
     }]);
-    setForm(prev => ({ ...prev, model: '', qty: '', unit: '', supplier: '', location: '' }));
+    setForm(prev => ({ ...prev, model: '', qty: '', unit: '' }));
   }
 
   function handleRemove(index) {
     setSession(prev => prev.filter((_, i) => i !== index));
   }
 
-  async function handleSaveAll() {
+  function handleSaveAll() {
     if (session.length === 0) { showToast('Nothing to save. Add exits first.'); return; }
-    try {
-      await addExits(session);
-      const count = session.length;
-      setSession([]);
-      handleClear();
-      showToast(`✓ ${count} exit ${count === 1 ? 'record' : 'records'} saved successfully.`);
-    } catch (err) {
-      showToast('⚠ Failed to save exits. Please try again.');
-      console.error('Save exits error:', err);
-    }
+    addExits(session);
+    const count = session.length;
+    setSession([]);
+    handleClear();
+    showToast(`✓ ${count} exit ${count === 1 ? 'record' : 'records'} saved successfully.`);
   }
 
   return (
@@ -166,30 +161,6 @@ export default function StockExit({ entries, exits, addExits, showToast }) {
                     : `${remainingHint.remaining} ${remainingHint.unit} will remain after this exit`}
                 </p>
               )}
-            </div>
-
-            <div className="form-group">
-              <label className="form-label" htmlFor="exit-supplier">Supplier</label>
-              <input
-                id="exit-supplier"
-                type="text"
-                name="supplier"
-                value={form.supplier}
-                onChange={handleChange}
-                placeholder="Name of supplier"
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label" htmlFor="exit-location">Location</label>
-              <input
-                id="exit-location"
-                type="text"
-                name="location"
-                value={form.location}
-                onChange={handleChange}
-                placeholder="Storage location"
-              />
             </div>
 
             <div className="btn-row">

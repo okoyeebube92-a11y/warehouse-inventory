@@ -6,7 +6,7 @@ export default function Badge({ variant = 'neutral', children, dot = false }) {
     green:   'dot-green',
     amber:   'dot-amber',
     red:     'dot-red',
-    blue:    'dot-green',
+    blue:    'dot-blue',
     neutral: '',
   }[variant];
 

@@ -24,6 +24,3 @@ export const addEntries = async (req, res) => {
     })
   }
 }
-
-console.log("HIT ENTRY CONTROLLER");
-console.log('ENTRY BODY:', req.body)

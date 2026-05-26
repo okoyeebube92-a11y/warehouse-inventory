@@ -1,7 +1,7 @@
 // src/pages/EntryByDate.jsx
 import { useState, useMemo } from 'react';
 import Badge from '../components/Badge';
-import { groupByDate, fmtDate } from '../utils/inventory';
+import { groupByDate, fmtDate, sumByUnit } from '../utils/inventory';
 import '../styles/EntryByDate.css';
 
 export default function EntryByDate({ entries }) {
@@ -129,8 +129,7 @@ export default function EntryByDate({ entries }) {
             </div>
             {sortedDates.map(date => {
               const items = dateMap[date];
-              const totalQty = items.reduce((s, e) => s + e.qty, 0);
-              const unit = items[0].unit;
+              const totals = sumByUnit(items);
               return (
                 <div
                   key={date}
@@ -142,7 +141,7 @@ export default function EntryByDate({ entries }) {
                     {items.length} item{items.length > 1 ? 's' : ''}
                   </Badge>
                   <span style={{ fontSize: 13, color: 'var(--text2)' }}>
-                    {totalQty} {unit}
+                    {[totals.pcs && `${totals.pcs} pcs`, totals.ctn && `${totals.ctn} ctn`].filter(Boolean).join(' · ')}
                   </span>
                   <span style={{ fontSize: 12, color: 'var(--text3)' }}>View →</span>
                 </div>

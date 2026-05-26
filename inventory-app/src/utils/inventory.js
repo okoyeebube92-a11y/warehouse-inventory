@@ -89,3 +89,19 @@ export function buildBalanceRows(entries, exits) {
     return { model, bal, totalIn, totalOut, unit, lastEntry, status };
   });
 }
+
+/**
+ * Sum quantities grouped by unit type.
+ * Returns { pcs: number, ctn: number }
+ * Safe to use on any mixed-unit array of entries or exits.
+ */
+export function sumByUnit(items) {
+  return items.reduce(
+    (acc, e) => {
+      if (e.unit === 'pcs') acc.pcs += e.qty;
+      else if (e.unit === 'ctn') acc.ctn += e.qty;
+      return acc;
+    },
+    { pcs: 0, ctn: 0 }
+  );
+}

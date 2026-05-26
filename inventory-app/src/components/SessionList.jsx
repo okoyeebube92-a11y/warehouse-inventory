@@ -25,9 +25,14 @@ export default function SessionList({ items, mode, onRemove, entries, exits }) {
         <span />
       </div>
       {items.map((item, i) => {
-        const remaining = mode === 'exit'
-          ? getBalance(item.model, entries, exits) - item.qty
-          : null;
+        let remaining = null;
+        if (mode === 'exit') {
+          const previouslyStaged = items
+            .slice(0, i + 1)
+            .filter(staged => staged.model === item.model)
+            .reduce((sum, staged) => sum + staged.qty, 0);
+          remaining = getBalance(item.model, entries, exits) - previouslyStaged;
+        }
 
         return (
           <div className="session-item" key={i}>

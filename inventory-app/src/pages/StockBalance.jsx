@@ -2,7 +2,7 @@
 import { useState, useMemo } from 'react';
 import MetricBox from '../components/MetricBox';
 import StatusBadge from '../components/StatusBadge';
-import { buildBalanceRows, fmtDate } from '../utils/inventory';
+import { buildBalanceRows, fmtDate, sumByUnit } from '../utils/inventory';
 import '../styles/StockBalance.css';
 
 const FILTER_MAP = {
@@ -28,8 +28,8 @@ export default function StockBalance({ entries, exits }) {
       });
   }, [allRows, filter, search]);
 
-  const totalIn  = entries.reduce((s, e) => s + e.qty, 0);
-  const totalOut = exits.reduce((s, e) => s + e.qty, 0);
+  const totalIn  = sumByUnit(entries);
+  const totalOut = sumByUnit(exits);
   const lowCount  = allRows.filter(r => r.status === 'low').length;
   const noneCount = allRows.filter(r => r.status === 'none').length;
   const alertCount = lowCount + noneCount;
@@ -49,8 +49,18 @@ export default function StockBalance({ entries, exits }) {
       {/* METRICS */}
       <div className="metrics">
         <MetricBox label="Total models"  value={allRows.length}  sub="unique SKUs" />
-        <MetricBox label="Total entered" value={totalIn}  sub="units received"  valueStyle={{ color: 'var(--green)' }} />
-        <MetricBox label="Total exited"  value={totalOut} sub="units removed"   valueStyle={{ color: 'var(--red)' }} />
+        <MetricBox
+          label="Total entered"
+          value={[totalIn.pcs && `${totalIn.pcs} pcs`, totalIn.ctn && `${totalIn.ctn} ctn`].filter(Boolean).join(' · ') || '0'}
+          sub="units received"
+          valueStyle={{ color: 'var(--green)' }}
+        />
+        <MetricBox
+          label="Total exited"
+          value={[totalOut.pcs && `${totalOut.pcs} pcs`, totalOut.ctn && `${totalOut.ctn} ctn`].filter(Boolean).join(' · ') || '0'}
+          sub="units removed"
+          valueStyle={{ color: 'var(--red)' }}
+        />
         <MetricBox
           label="Alerts"
           value={alertCount}
