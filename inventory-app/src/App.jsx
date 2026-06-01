@@ -4,11 +4,13 @@ import { useMemo } from 'react';
 
 import NavBar     from './components/NavBar';
 import Toast      from './components/Toast';
+
 import StockEntry  from './pages/StockEntry';
 import StockExit   from './pages/StockExit';
-import EntryByDate from './pages/EntryByDate';
 import StockBalance from './pages/StockBalance';
 import LoginPage   from './pages/LoginPage';
+import History from './pages/History';
+import Settings from './pages/Settings';
 
 import { useInventory } from './hooks/useInventory';
 import { useToast }     from './hooks/useToast';
@@ -32,22 +34,11 @@ export default function App() {
 
       <Routes>
         <Route path="/" element={<Navigate to="/stock-entry" replace />} />
-        <Route
-          path="/stock-entry"
-          element={<StockEntry {...pageProps} addEntries={addEntries} />}
-        />
-        <Route
-          path="/stock-exit"
-          element={<StockExit {...pageProps} addExits={addExits} />}
-        />
-        <Route
-          path="/entry-by-date"
-          element={<EntryByDate entries={entries} />}
-        />
-        <Route
-          path="/balance"
-          element={<StockBalance entries={entries} exits={exits} />}
-        />
+        <Route path="/stock-entry" element={<StockEntry {...pageProps} addEntries={addEntries} />} />
+        <Route path="/stock-exit" element={<StockExit {...pageProps} addExits={addExits} />} />
+        <Route path="/balance" element={<StockBalance entries={entries} exits={exits} />} />
+        <Route path="/history" element={<History />} />
+        <Route path="/settings" element={<Settings />} />
         <Route path="/login" element={<LoginPage />} />
       </Routes>
 
