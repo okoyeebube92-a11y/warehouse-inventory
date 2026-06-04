@@ -11,13 +11,28 @@ import StockBalance from './pages/StockBalance';
 import LoginPage   from './pages/LoginPage';
 import History from './pages/History';
 import Settings from './pages/Settings';
+import ProtectedRoute from './components/ProtectedRoute';
 
+import { useAuth } from './hooks/useAuth';
 import { useInventory } from './hooks/useInventory';
 import { useToast }     from './hooks/useToast';
 import { getAllModels, getBalance, getStatus } from './utils/inventory';
 
 export default function App() {
-  const { entries, exits, addEntries, addExits } = useInventory();
+  const { user } = useAuth();
+  const { 
+    entries, 
+    exits, 
+    addEntries, 
+    deleteEntry, 
+    updateEntry, 
+    addExits, 
+    deleteExit, 
+    updateExit, 
+    adminPin, 
+    setAdminPin, 
+    loading 
+  } = useInventory(user);
   const { toast, showToast } = useToast();
 
   // Alert count for the nav badge — derived from live state
@@ -28,18 +43,81 @@ export default function App() {
 
   const pageProps = { entries, exits, showToast };
 
+  if (user && loading) {
+    return (
+      <div style={{ 
+        height: '100vh', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        color: 'var(--text2)',
+        fontFamily: 'var(--font-head)'
+      }}>
+        Syncing with Supabase...
+      </div>
+    );
+  }
+
   return (
     <>
-      <NavBar alertCount={alertCount} />
+      {user && <NavBar alertCount={alertCount} />}
 
       <Routes>
-        <Route path="/" element={<Navigate to="/stock-entry" replace />} />
-        <Route path="/stock-entry" element={<StockEntry {...pageProps} addEntries={addEntries} />} />
-        <Route path="/stock-exit" element={<StockExit {...pageProps} addExits={addExits} />} />
-        <Route path="/balance" element={<StockBalance entries={entries} exits={exits} />} />
-        <Route path="/history" element={<History />} />
-        <Route path="/settings" element={<Settings />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/" element={<Navigate to="/balance" replace />} />
+        <Route
+          path="/stock-entry"
+          element={
+            <ProtectedRoute>
+              <StockEntry {...pageProps} addEntries={addEntries} />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/stock-exit"
+          element={
+            <ProtectedRoute>
+              <StockExit {...pageProps} addExits={addExits} />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/balance"
+          element={
+            <ProtectedRoute>
+              <StockBalance entries={entries} exits={exits} />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/history"
+          element={
+            <ProtectedRoute>
+              <History 
+                entries={entries}
+                exits={exits}
+                deleteEntry={deleteEntry}
+                deleteExit={deleteExit}
+                updateEntry={updateEntry}
+                updateExit={updateExit}
+                adminPin={adminPin}
+                showToast={showToast}
+              />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Settings 
+                adminPin={adminPin}
+                setAdminPin={setAdminPin}
+                showToast={showToast}
+              />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
 
       <Toast message={toast.message} visible={toast.visible} />

@@ -1,0 +1,30 @@
+.view-toggle button {
+  border-radius: 0;
+}
+.view-toggle button:first-child {
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+}
+.view-toggle button:last-child {
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  border-left: none;
+}
+
+.filters-header {
+  background: var(--surface2) !important;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 20px;
+}
+
+.filters-header input {
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-family: var(--font-head);
+  outline: none;
+}
+
+.filters-header input:focus {
+  border-color: var(--accent);
+}

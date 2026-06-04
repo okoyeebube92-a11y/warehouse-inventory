@@ -1,119 +1,184 @@
-// src/hooks/useInventory.js
-// Central state hook. Swap localStorage calls for API calls here
-// when connecting to Supabase or a Node.js backend.
+import { useState, useCallback, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 
-import { useState, useCallback } from 'react';
-
-const STORAGE_KEYS = {
-  entries: 'inv_entries',
-  exits:   'inv_exits',
-  adminPin: 'inv_admin_pin',
-};
-
-
-function loadFromStorage(key, fallback = []) {
-  try {
-    const value = localStorage.getItem(key);
-    return value !== null ? JSON.parse(value) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-function saveToStorage(key, data) {
-  localStorage.setItem(key, JSON.stringify(data));
-}
-
-// Ensure all records have a unique id
-function ensureIds(arr) {
-  return arr.map(item => ({
-    ...item,
-    id: item.id || (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2)),
-  }));
-}
-  // Load and ensure IDs for all records
-  const [entries, setEntries] = useState(() => {
-    const loaded = loadFromStorage(STORAGE_KEYS.entries);
-    const withIds = ensureIds(loaded);
-    if (withIds.length !== loaded.length) saveToStorage(STORAGE_KEYS.entries, withIds);
-    return withIds;
-  });
-  const [exits, setExits] = useState(() => {
-    const loaded = loadFromStorage(STORAGE_KEYS.exits);
-    const withIds = ensureIds(loaded);
-    if (withIds.length !== loaded.length) saveToStorage(STORAGE_KEYS.exits, withIds);
-    return withIds;
+export function useInventory(user) {
+  const [entries, setEntries] = useState([]);
+  const [exits, setExits] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [adminPin, setAdminPinState] = useState(() => {
+    return localStorage.getItem('inv_admin_pin') || '';
   });
 
-  // Admin PIN state
-  const [adminPin, setAdminPinState] = useState(() => loadFromStorage(STORAGE_KEYS.adminPin, ''));
   const setAdminPin = useCallback((pin) => {
+    localStorage.setItem('inv_admin_pin', pin);
     setAdminPinState(pin);
-    saveToStorage(STORAGE_KEYS.adminPin, pin);
   }, []);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { data: entriesData, error: entriesError } = await supabase
+        .from('stock_entries')
+        .select('*')
+        .order('date', { ascending: false });
+
+      const { data: exitsData, error: exitsError } = await supabase
+        .from('stock_exits')
+        .select('*')
+        .order('date', { ascending: false });
+
+      if (entriesError) throw entriesError;
+      if (exitsError) throw exitsError;
+
+      setEntries(entriesData || []);
+      setExits(exitsData || []);
+    } catch (error) {
+      console.error("Error fetching inventory data:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      fetchData();
+    } else {
+      setEntries([]);
+      setExits([]);
+      setLoading(false);
+    }
+  }, [fetchData, user]);
 
   // ---------- ENTRIES ----------
-  const addEntries = useCallback((newItems) => {
-    setEntries(prev => {
-      const withIds = ensureIds(newItems);
-      const updated = [...prev, ...withIds];
-      saveToStorage(STORAGE_KEYS.entries, updated);
-      return updated;
-    });
+  const addEntries = useCallback(async (newItems) => {
+    try {
+      const itemsWithUser = newItems.map(item => ({
+        model: item.model,
+        qty: item.qty,
+        unit: item.unit,
+        date: item.date,
+        user_id: user?.id
+      }));
+
+      const { data, error } = await supabase
+        .from('stock_entries')
+        .insert(itemsWithUser)
+        .select();
+
+      if (error) throw error;
+      setEntries(prev => [...(data || []), ...prev]);
+      return data;
+    } catch (error) {
+      console.error("Error adding entries:", error);
+      throw error;
+    }
+  }, [user]);
+
+  const deleteEntry = useCallback(async (id) => {
+    try {
+      const { error } = await supabase
+        .from('stock_entries')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      setEntries(prev => prev.filter(item => item.id !== id));
+    } catch (error) {
+      console.error("Error deleting entry:", error);
+      throw error;
+    }
   }, []);
 
-  const updateEntry = useCallback((id, data) => {
-    setEntries(prev => {
-      const updated = prev.map(e => e.id === id ? { ...e, ...data } : e);
-      saveToStorage(STORAGE_KEYS.entries, updated);
-      return updated;
-    });
-  }, []);
+  const updateEntry = useCallback(async (id, updatedFields) => {
+    try {
+      const { id: _, created_at: __, user_id: ___, ...fieldsToUpdate } = updatedFields;
+      const { data, error } = await supabase
+        .from('stock_entries')
+        .update(fieldsToUpdate)
+        .eq('id', id)
+        .select();
 
-  const deleteEntry = useCallback((id) => {
-    setEntries(prev => {
-      const updated = prev.filter(e => e.id !== id);
-      saveToStorage(STORAGE_KEYS.entries, updated);
-      return updated;
-    });
+      if (error) throw error;
+      setEntries(prev => prev.map(item => item.id === id ? { ...item, ...data[0] } : item));
+      return data;
+    } catch (error) {
+      console.error("Error updating entry:", error);
+      throw error;
+    }
   }, []);
 
   // ---------- EXITS ----------
-  const addExits = useCallback((newItems) => {
-    setExits(prev => {
-      const withIds = ensureIds(newItems);
-      const updated = [...prev, ...withIds];
-      saveToStorage(STORAGE_KEYS.exits, updated);
-      return updated;
-    });
+  const addExits = useCallback(async (newItems) => {
+    try {
+      const itemsWithUser = newItems.map(item => ({
+        model: item.model,
+        qty: item.qty,
+        unit: item.unit,
+        date: item.date,
+        supplier: item.supplier || null,
+        location: item.location || null,
+        user_id: user?.id
+      }));
+
+      const { data, error } = await supabase
+        .from('stock_exits')
+        .insert(itemsWithUser)
+        .select();
+
+      if (error) throw error;
+      setExits(prev => [...(data || []), ...prev]);
+      return data;
+    } catch (error) {
+      console.error("Error adding exits:", error);
+      throw error;
+    }
+  }, [user]);
+
+  const deleteExit = useCallback(async (id) => {
+    try {
+      const { error } = await supabase
+        .from('stock_exits')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      setExits(prev => prev.filter(item => item.id !== id));
+    } catch (error) {
+      console.error("Error deleting exit:", error);
+      throw error;
+    }
   }, []);
 
-  const updateExit = useCallback((id, data) => {
-    setExits(prev => {
-      const updated = prev.map(e => e.id === id ? { ...e, ...data } : e);
-      saveToStorage(STORAGE_KEYS.exits, updated);
-      return updated;
-    });
+  const updateExit = useCallback(async (id, updatedFields) => {
+    try {
+      const { id: _, created_at: __, user_id: ___, ...fieldsToUpdate } = updatedFields;
+      const { data, error } = await supabase
+        .from('stock_exits')
+        .update(fieldsToUpdate)
+        .eq('id', id)
+        .select();
+
+      if (error) throw error;
+      setExits(prev => prev.map(item => item.id === id ? { ...item, ...data[0] } : item));
+      return data;
+    } catch (error) {
+      console.error("Error updating exit:", error);
+      throw error;
+    }
   }, []);
 
-  const deleteExit = useCallback((id) => {
-    setExits(prev => {
-      const updated = prev.filter(e => e.id !== id);
-      saveToStorage(STORAGE_KEYS.exits, updated);
-      return updated;
-    });
-  }, []);
-
-  return {
-    entries,
-    exits,
-    addEntries,
-    addExits,
-    updateEntry,
-    updateExit,
-    deleteEntry,
-    deleteExit,
-    adminPin,
+  return { 
+    entries, 
+    exits, 
+    loading, 
+    addEntries, 
+    deleteEntry, 
+    updateEntry, 
+    addExits, 
+    deleteExit, 
+    updateExit, 
+    adminPin, 
     setAdminPin,
+    refresh: fetchData 
   };
 }

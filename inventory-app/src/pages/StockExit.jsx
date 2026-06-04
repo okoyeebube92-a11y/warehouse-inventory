@@ -12,6 +12,8 @@ export default function StockExit({ entries, exits, addExits, showToast }) {
     date:  todayISO(),
     qty:   '',
     unit:  '',
+    supplier: '',
+    location: '',
   });
   const [session, setSession] = useState([]);
 
@@ -43,7 +45,7 @@ export default function StockExit({ entries, exits, addExits, showToast }) {
   }
 
   function handleClear() {
-    setForm({ model: '', date: todayISO(), qty: '', unit: '' });
+    setForm({ model: '', date: todayISO(), qty: '', unit: '', supplier: '', location: '' });
   }
 
   function handleAddToList() {
@@ -69,8 +71,10 @@ export default function StockExit({ entries, exits, addExits, showToast }) {
       date:  form.date,
       qty,
       unit:  form.unit,
+      supplier: form.supplier.trim() || null,
+      location: form.location.trim() || null,
     }]);
-    setForm(prev => ({ ...prev, model: '', qty: '', unit: '' }));
+    setForm(prev => ({ ...prev, model: '', qty: '', unit: '', supplier: '', location: '' }));
   }
 
   function handleRemove(index) {
@@ -134,6 +138,32 @@ export default function StockExit({ entries, exits, addExits, showToast }) {
                 name="date"
                 value={form.date}
                 onChange={handleChange}
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label" htmlFor="exit-supplier">Supplier / Client</label>
+              <input
+                id="exit-supplier"
+                type="text"
+                name="supplier"
+                value={form.supplier}
+                onChange={handleChange}
+                placeholder="e.g. OKEY SHOP 2"
+                autoComplete="off"
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label" htmlFor="exit-location">Location</label>
+              <input
+                id="exit-location"
+                type="text"
+                name="location"
+                value={form.location}
+                onChange={handleChange}
+                placeholder="e.g. LAGOS"
+                autoComplete="off"
               />
             </div>
 
